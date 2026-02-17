@@ -1,0 +1,1 @@
+{"indexed_fields":{"diagnosis":"keyword","benign_malignant":"keyword","dataset":"keyword","tissue_type":"keyword"}}

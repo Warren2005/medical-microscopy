@@ -1,0 +1,1 @@
+{"schema":{"tissue_type":"keyword","diagnosis":"keyword","benign_malignant":"keyword","dataset":"keyword"}}
