@@ -1,0 +1,30 @@
+"""Pydantic models for search request/response."""
+
+from pydantic import BaseModel
+
+from app.schemas.image import ImageResponse
+
+
+class SearchResult(BaseModel):
+    image: ImageResponse
+    similarity_score: float
+    image_url: str
+
+
+class SearchResponse(BaseModel):
+    query_processing_time_ms: float
+    search_time_ms: float
+    total_time_ms: float
+    results: list[SearchResult]
+    result_count: int
+
+
+class ImageDetailResponse(BaseModel):
+    image: ImageResponse
+    image_url: str
+
+
+class FiltersResponse(BaseModel):
+    diagnoses: list[str]
+    tissue_types: list[str]
+    benign_malignant: list[str]

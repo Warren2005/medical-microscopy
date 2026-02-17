@@ -2,29 +2,72 @@
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
-.Python
 *.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+.Python
 
 # Node
 node_modules/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# IDEs
-.vscode/
-.idea/
+# Build output
+frontend/dist/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
 
 # OS
 .DS_Store
 Thumbs.db
+._*
 
-# Environment
-.env
-*.log
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # Databases (local development)
 *.db
 *.sqlite
+*.sqlite3
 
 # MinIO data
 minio-data/
+
+# Dataset files (large — download separately)
+backend/data/
+*.zip
+
+# CLIP model cache
+.cache/
+
+# Alembic
+backend/alembic/__pycache__/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+
+# Ingestion checkpoints
+.ingest_checkpoint.db
