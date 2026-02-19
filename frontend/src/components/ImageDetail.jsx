@@ -1,7 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
+import { getExplainability } from "../api/client";
 
 export default function ImageDetail({ result, onBack }) {
   const { image, similarity_score, image_url } = result;
+  const [heatmapUrl, setHeatmapUrl] = useState(null);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleToggleHeatmap = async () => {
+    if (showHeatmap) {
+      setShowHeatmap(false);
+      return;
+    }
+
+    if (heatmapUrl) {
+      setShowHeatmap(true);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const url = await getExplainability(image.id);
+      setHeatmapUrl(url);
+      setShowHeatmap(true);
+    } catch (err) {
+      setError("Failed to generate attention map");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="image-detail">
@@ -11,7 +40,21 @@ export default function ImageDetail({ result, onBack }) {
 
       <div className="detail-content">
         <div className="detail-image-container">
-          <img src={image_url} alt={image.diagnosis || "Medical image"} className="detail-image" />
+          <img
+            src={showHeatmap && heatmapUrl ? heatmapUrl : image_url}
+            alt={image.diagnosis || "Medical image"}
+            className="detail-image"
+          />
+          <div className="heatmap-controls">
+            <button
+              className={`btn ${showHeatmap ? "btn-primary" : "btn-secondary"}`}
+              onClick={handleToggleHeatmap}
+              disabled={loading}
+            >
+              {loading ? "Generating..." : showHeatmap ? "Show Original" : "Show Attention Map"}
+            </button>
+            {error && <span className="heatmap-error">{error}</span>}
+          </div>
         </div>
 
         <div className="detail-metadata">

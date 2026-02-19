@@ -9,6 +9,7 @@ class ServiceStatus(BaseModel):
     qdrant: str
     minio: str
     clip: str
+    redis: str
 
 
 class HealthResponse(BaseModel):

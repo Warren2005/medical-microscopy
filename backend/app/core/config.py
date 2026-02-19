@@ -47,7 +47,12 @@ class Settings(BaseSettings):
     # CLIP Model Settings
     clip_model_name: str = "ViT-B/32"
     clip_device: str = "cpu"  # or "cuda" if GPU available
+    inference_workers: int = 4
     
+    # Redis Cache
+    redis_url: str = "redis://localhost:6379/0"
+    cache_ttl_hours: int = 24
+
     # Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     

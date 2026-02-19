@@ -10,10 +10,15 @@ This file:
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.routing import Route
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.logging_config import logger
@@ -24,11 +29,16 @@ from app.middleware.error_handler import (
     http_exception_handler,
     unhandled_exception_handler,
 )
+from app.middleware.metrics import PrometheusMiddleware, metrics_endpoint
 from app.api.v1.endpoints.router import api_router
 from app.services.database import db_service
 from app.services.qdrant import qdrant_service
 from app.services.storage import storage_service
 from app.services.embedding import embedding_service
+from app.services.cache import cache_service
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -66,6 +76,11 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to load CLIP model: {e}")
 
+    try:
+        await cache_service.connect()
+    except Exception as e:
+        logger.error(f"Failed to connect to Redis: {e}")
+
     yield
 
     # Shutdown
@@ -73,6 +88,7 @@ async def lifespan(app: FastAPI):
     await db_service.disconnect()
     await qdrant_service.disconnect()
     storage_service.disconnect()
+    await cache_service.disconnect()
 
 
 # Create FastAPI application
@@ -86,6 +102,9 @@ app = FastAPI(
 )
 
 
+# Rate limiter state
+app.state.limiter = limiter
+
 # CORS middleware - allows frontend to call backend
 app.add_middleware(
     CORSMiddleware,
@@ -95,16 +114,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Prometheus metrics middleware
+app.add_middleware(PrometheusMiddleware)
+
 
 # Register exception handlers
 app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
 
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
+
+# Prometheus metrics endpoint
+app.routes.append(Route("/metrics", metrics_endpoint))
 
 
 @app.get("/")

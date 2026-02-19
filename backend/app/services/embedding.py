@@ -5,6 +5,7 @@ Loads ViT-B/32 model once at startup.
 Exposes get_embedding() to convert image bytes to a 512-dim normalized vector.
 """
 
+import asyncio
 import io
 import time
 from typing import Optional
@@ -15,6 +16,8 @@ from PIL import Image
 
 from app.core.config import settings
 from app.core.logging_config import logger
+from app.services.cache import cache_service, CacheService
+from app.middleware.metrics import cache_hit_total, cache_miss_total
 
 
 class EmbeddingService:
@@ -36,20 +39,58 @@ class EmbeddingService:
             self.clip_model_name, pretrained="openai", device=self._device
         )
         self.model.eval()
+        self._tokenizer = open_clip.get_tokenizer(self.clip_model_name)
         elapsed = time.time() - start
         logger.info(
             f"CLIP model loaded in {elapsed:.2f}s",
             extra={"model": self.clip_model_name, "device": self._device},
         )
 
-    async def get_embedding(self, image_bytes: bytes) -> list[float]:
-        """Convert image bytes to a 512-dim L2-normalized embedding vector."""
+    def _compute_embedding(self, image_bytes: bytes) -> list[float]:
+        """Synchronous CLIP inference. Runs in a thread to avoid blocking the event loop."""
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         image_tensor = self._preprocess(image).unsqueeze(0).to(self._device)
         with torch.no_grad():
             embedding = self.model.encode_image(image_tensor)
             embedding = embedding / embedding.norm(dim=-1, keepdim=True)
         return embedding.squeeze().cpu().tolist()
+
+    async def get_embedding(self, image_bytes: bytes) -> list[float]:
+        """Convert image bytes to a 512-dim L2-normalized embedding vector."""
+        image_hash = CacheService.hash_image(image_bytes)
+
+        # Check cache first
+        try:
+            cached = await cache_service.get_embedding(image_hash)
+            if cached is not None:
+                cache_hit_total.inc()
+                logger.debug("Cache hit for embedding", extra={"hash": image_hash})
+                return cached
+        except Exception:
+            logger.warning("Cache read failed, computing embedding", extra={"hash": image_hash})
+
+        cache_miss_total.inc()
+        embedding = await asyncio.to_thread(self._compute_embedding, image_bytes)
+
+        # Store in cache
+        try:
+            await cache_service.set_embedding(image_hash, embedding)
+        except Exception:
+            logger.warning("Cache write failed", extra={"hash": image_hash})
+
+        return embedding
+
+    def _compute_text_embedding(self, text: str) -> list[float]:
+        """Synchronous CLIP text inference."""
+        tokens = self._tokenizer([text]).to(self._device)
+        with torch.no_grad():
+            embedding = self.model.encode_text(tokens)
+            embedding = embedding / embedding.norm(dim=-1, keepdim=True)
+        return embedding.squeeze().cpu().tolist()
+
+    async def get_text_embedding(self, text: str) -> list[float]:
+        """Convert text query to a 512-dim L2-normalized embedding vector."""
+        return await asyncio.to_thread(self._compute_text_embedding, text)
 
     def health_check(self) -> bool:
         return self.model is not None

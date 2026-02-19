@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { searchSimilar, getFilters, checkHealth } from "./api/client";
+import { searchSimilar, searchByText, getFilters, checkHealth } from "./api/client";
 import DropZone from "./components/DropZone";
 import ResultsGrid from "./components/ResultsGrid";
 import ImageDetail from "./components/ImageDetail";
@@ -15,6 +15,7 @@ export default function App() {
   const [health, setHealth] = useState(null);
   const [error, setError] = useState(null);
   const [queryFile, setQueryFile] = useState(null);
+  const [textQuery, setTextQuery] = useState("");
 
   // Check backend health on mount
   useEffect(() => {
@@ -49,6 +50,27 @@ export default function App() {
     [filters]
   );
 
+  const handleTextSearch = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!textQuery.trim()) return;
+      setState("searching");
+      setError(null);
+      setResults(null);
+      setQueryFile(null);
+
+      try {
+        const data = await searchByText(textQuery.trim(), filters);
+        setResults(data);
+        setState("results");
+      } catch (err) {
+        setError(err.message);
+        setState("idle");
+      }
+    },
+    [textQuery, filters]
+  );
+
   const handleResultClick = useCallback((result) => {
     setSelectedResult(result);
     setState("detail");
@@ -64,6 +86,7 @@ export default function App() {
     setResults(null);
     setSelectedResult(null);
     setQueryFile(null);
+    setTextQuery("");
   }, []);
 
   const handleFilterChange = useCallback(
@@ -96,7 +119,30 @@ export default function App() {
           </div>
         )}
 
-        {state === "idle" && <DropZone onFileDrop={handleSearch} />}
+        {state === "idle" && (
+          <>
+            <DropZone onFileDrop={handleSearch} />
+            <div className="text-search">
+              <div className="text-search-divider">or search by description</div>
+              <form className="text-search-form" onSubmit={handleTextSearch}>
+                <input
+                  type="text"
+                  className="text-search-input"
+                  placeholder="e.g. melanoma with irregular border"
+                  value={textQuery}
+                  onChange={(e) => setTextQuery(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={!textQuery.trim()}
+                >
+                  Search
+                </button>
+              </form>
+            </div>
+          </>
+        )}
 
         {state === "searching" && (
           <div className="loading">

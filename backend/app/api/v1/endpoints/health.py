@@ -17,6 +17,7 @@ from app.services.database import db_service
 from app.services.qdrant import qdrant_service
 from app.services.storage import storage_service
 from app.services.embedding import embedding_service
+from app.services.cache import cache_service
 
 router = APIRouter()
 
@@ -58,6 +59,12 @@ async def health_check():
         service_checks["clip"] = "up" if embedding_service.health_check() else "down"
     except Exception:
         service_checks["clip"] = "down"
+
+    # Check Redis
+    try:
+        service_checks["redis"] = "up" if await cache_service.health_check() else "down"
+    except Exception:
+        service_checks["redis"] = "down"
 
     # Determine overall status
     external_services = ["postgres", "qdrant", "minio"]
