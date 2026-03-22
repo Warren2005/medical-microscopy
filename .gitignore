@@ -51,9 +51,17 @@ Thumbs.db
 # MinIO data
 minio-data/
 
-# Dataset files (large — download separately)
+# Dataset files and images (large — download/provide separately)
 backend/data/
+images/
 *.zip
+
+# ML model files
+*.pt
+*.pth
+*.bin
+*.ckpt
+*.safetensors
 
 # CLIP model cache
 .cache/
@@ -68,9 +76,6 @@ htmlcov/
 
 # MyPy
 .mypy_cache/
-
-# Ingestion checkpoints
-.ingest_checkpoint.db
 
 # Project docs not for version control
 RESUME.md

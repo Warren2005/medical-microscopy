@@ -20,6 +20,9 @@ WORKDIR /app
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
+# Pre-download CLIP model at build time so it's baked into the image
+RUN python -c "import open_clip; open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')"
+
 # Copy application code
 COPY . .
 
