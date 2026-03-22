@@ -1,5 +1,5 @@
-// Auto-detect API URL: in browser (nginx proxy) use relative path, in Electron use localhost
-const isElectron = typeof window !== "undefined" && window.process && window.process.type;
+// Auto-detect API URL: in Electron (file: protocol) use localhost, in browser (nginx proxy) use relative path
+const isElectron = typeof window !== "undefined" && window.location.protocol === "file:";
 const BASE_URL = isElectron ? "http://localhost:8000/api/v1" : "/api/v1";
 
 export async function searchSimilar(file, filters = {}) {

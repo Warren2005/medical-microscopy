@@ -71,3 +71,6 @@ htmlcov/
 
 # Ingestion checkpoints
 .ingest_checkpoint.db
+
+# Project docs not for version control
+RESUME.md
