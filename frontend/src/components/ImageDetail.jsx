@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getExplainability } from "../api/client";
+import { getExplainability, resolveImageUrl } from "../api/client";
 
 export default function ImageDetail({ result, onBack }) {
   const { image, similarity_score, image_url } = result;
@@ -41,7 +41,7 @@ export default function ImageDetail({ result, onBack }) {
       <div className="detail-content">
         <div className="detail-image-container">
           <img
-            src={showHeatmap && heatmapUrl ? heatmapUrl : image_url}
+            src={showHeatmap && heatmapUrl ? heatmapUrl : resolveImageUrl(image_url)}
             alt={image.diagnosis || "Medical image"}
             className="detail-image"
           />

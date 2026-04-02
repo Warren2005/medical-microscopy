@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     
     # Object Storage - MinIO
     minio_endpoint: str = "localhost:9000"
+    minio_public_endpoint: str = "localhost:9000"  # Used in presigned URLs — must be reachable by the browser
     minio_access_key: str = "minioadmin"
     minio_secret_key: str = "minioadmin"
     minio_bucket: str = "medical-images"

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { submitFeedback } from "../api/client";
+import { submitFeedback, resolveImageUrl } from "../api/client";
 
 export default function ResultsGrid({ results, onResultClick, queryImageId }) {
   const [votes, setVotes] = useState({});
@@ -34,7 +34,7 @@ export default function ResultsGrid({ results, onResultClick, queryImageId }) {
         >
           <div className="result-rank">#{index + 1}</div>
           <img
-            src={result.image_url}
+            src={resolveImageUrl(result.image_url)}
             alt={result.image.diagnosis || "Medical image"}
             className="result-image"
             loading="lazy"

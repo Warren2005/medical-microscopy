@@ -8,6 +8,7 @@ GET /api/v1/images/{image_id} — single image metadata + presigned URL
 from uuid import UUID
 
 from fastapi import APIRouter
+from fastapi.responses import Response
 from sqlalchemy import select
 
 from app.core.errors import NotFoundError
@@ -41,9 +42,9 @@ async def get_filters():
     )
 
 
-@router.get("/{image_id}", response_model=ImageDetailResponse)
-async def get_image(image_id: UUID):
-    """Fetch a single image's metadata and presigned URL."""
+@router.get("/{image_id}/file")
+async def get_image_file(image_id: UUID):
+    """Proxy the raw image bytes from MinIO."""
     async with db_service.get_session() as session:
         image = await session.get(Image, image_id)
         if not image:
@@ -51,8 +52,23 @@ async def get_image(image_id: UUID):
                 f"Image {image_id} not found",
                 details={"image_id": str(image_id)},
             )
-        url = storage_service.get_presigned_url(image.image_path)
+    data = storage_service.get_image(image.image_path)
+    suffix = image.image_path.rsplit(".", 1)[-1].lower()
+    media_type = "image/jpeg" if suffix in ("jpg", "jpeg") else f"image/{suffix}"
+    return Response(content=data, media_type=media_type)
+
+
+@router.get("/{image_id}", response_model=ImageDetailResponse)
+async def get_image(image_id: UUID):
+    """Fetch a single image's metadata and URL."""
+    async with db_service.get_session() as session:
+        image = await session.get(Image, image_id)
+        if not image:
+            raise NotFoundError(
+                f"Image {image_id} not found",
+                details={"image_id": str(image_id)},
+            )
         return ImageDetailResponse(
             image=ImageResponse.model_validate(image),
-            image_url=url,
+            image_url=f"/api/v1/images/{image_id}/file",
         )

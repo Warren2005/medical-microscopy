@@ -107,12 +107,11 @@ async def search_similar(
             net_vote = feedback_scores.get(image.id, 0)
             adjusted_score = point.score + (net_vote * FEEDBACK_WEIGHT)
             adjusted_score = max(0.0, min(1.0, adjusted_score))
-            url = storage_service.get_presigned_url(image.image_path)
             results.append(
                 SearchResult(
                     image=ImageResponse.model_validate(image),
                     similarity_score=round(adjusted_score, 6),
-                    image_url=url,
+                    image_url=f"/api/v1/images/{image.id}/file",
                 )
             )
 

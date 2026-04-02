@@ -2,6 +2,15 @@
 const isElectron = typeof window !== "undefined" && window.location.protocol === "file:";
 const BASE_URL = isElectron ? "http://localhost:8000/api/v1" : "/api/v1";
 
+// Resolve image proxy paths returned by the backend (/api/v1/images/{id}/file).
+// In Electron the path must be absolute since there's no server to resolve it against.
+export function resolveImageUrl(url) {
+  if (isElectron && url && url.startsWith("/")) {
+    return `http://localhost:8000${url}`;
+  }
+  return url;
+}
+
 export async function searchSimilar(file, filters = {}) {
   const formData = new FormData();
   formData.append("file", file);

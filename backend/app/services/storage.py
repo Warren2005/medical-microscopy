@@ -26,8 +26,10 @@ class StorageService:
         secret_key: str,
         bucket: str,
         secure: bool = False,
+        public_endpoint: Optional[str] = None,
     ):
         self._endpoint = endpoint
+        self._public_endpoint = public_endpoint or endpoint
         self._access_key = access_key
         self._secret_key = secret_key
         self._bucket = bucket
@@ -72,9 +74,14 @@ class StorageService:
     def get_presigned_url(
         self, object_name: str, expiry: timedelta = timedelta(hours=1)
     ) -> str:
-        return self._client.presigned_get_object(
+        url = self._client.presigned_get_object(
             self._bucket, object_name, expires=expiry
         )
+        # Replace internal Docker hostname with the public-facing endpoint
+        # so browsers can reach the URL directly.
+        if self._public_endpoint != self._endpoint:
+            url = url.replace(self._endpoint, self._public_endpoint, 1)
+        return url
 
     def get_image(self, object_name: str) -> bytes:
         response = self._client.get_object(self._bucket, object_name)
@@ -87,6 +94,7 @@ class StorageService:
 
 storage_service = StorageService(
     endpoint=settings.minio_endpoint,
+    public_endpoint=settings.minio_public_endpoint,
     access_key=settings.minio_access_key,
     secret_key=settings.minio_secret_key,
     bucket=settings.minio_bucket,
