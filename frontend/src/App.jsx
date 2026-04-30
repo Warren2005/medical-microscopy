@@ -6,6 +6,23 @@ import ImageDetail from "./components/ImageDetail";
 import FilterBar from "./components/FilterBar";
 import StatusBar from "./components/StatusBar";
 
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
 export default function App() {
   const [state, setState] = useState("idle"); // idle | searching | results | detail
   const [results, setResults] = useState(null);
@@ -16,6 +33,16 @@ export default function App() {
   const [error, setError] = useState(null);
   const [queryFile, setQueryFile] = useState(null);
   const [textQuery, setTextQuery] = useState("");
+  const [isDark, setIsDark] = useState(
+    () => (localStorage.getItem("theme") ?? "dark") === "dark"
+  );
+
+  // Apply theme to <html> and persist to localStorage
+  useEffect(() => {
+    const theme = isDark ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [isDark]);
 
   // Check backend health on mount
   useEffect(() => {
@@ -28,7 +55,7 @@ export default function App() {
   useEffect(() => {
     getFilters()
       .then(setFilterOptions)
-      .catch(() => {}); // Silently fail — filters are optional
+      .catch(() => {});
   }, []);
 
   const handleSearch = useCallback(
@@ -92,7 +119,6 @@ export default function App() {
   const handleFilterChange = useCallback(
     (newFilters) => {
       setFilters(newFilters);
-      // Re-run search if we have a query file
       if (queryFile) {
         handleSearch(queryFile);
       }
@@ -104,11 +130,20 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>Medical Microscopy Similarity Engine</h1>
-        {state !== "idle" && (
-          <button className="btn btn-secondary" onClick={handleNewSearch}>
-            New Search
+        <div className="header-actions">
+          {state !== "idle" && (
+            <button className="btn btn-secondary" onClick={handleNewSearch}>
+              New Search
+            </button>
+          )}
+          <button
+            className="theme-toggle"
+            onClick={() => setIsDark((d) => !d)}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? <SunIcon /> : <MoonIcon />}
           </button>
-        )}
+        </div>
       </header>
 
       <main className="app-main">
