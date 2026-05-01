@@ -26,8 +26,11 @@ RUN python -c "import open_clip; open_clip.create_model_and_transforms('ViT-B-32
 # Copy application code
 COPY . .
 
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
-# Run with gunicorn (production) — uses gunicorn.conf.py
-CMD ["gunicorn", "app.main:app", "-c", "gunicorn.conf.py"]
+# Run migrations then start gunicorn
+ENTRYPOINT ["./entrypoint.sh"]

@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import DateTime, Index, Integer, String, text
+from sqlalchemy import DateTime, Index, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -33,6 +33,14 @@ class Image(Base):
     benign_malignant: Mapped[Optional[str]] = mapped_column(String(20))
     age: Mapped[Optional[int]] = mapped_column(Integer)
     sex: Mapped[Optional[str]] = mapped_column(String(10))
+    anomaly_description: Mapped[Optional[str]] = mapped_column(String(500))
+    anomaly_status: Mapped[Optional[str]] = mapped_column(String(100))
+    anomaly_type: Mapped[Optional[str]] = mapped_column(String(50))
+    identification: Mapped[Optional[str]] = mapped_column(String(100))
+    wall_location: Mapped[Optional[str]] = mapped_column(String(50))
+    run_number: Mapped[Optional[str]] = mapped_column(String(100))
+    analysis_comment: Mapped[Optional[str]] = mapped_column(Text)
+    analyst: Mapped[Optional[str]] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=text("NOW()")
     )

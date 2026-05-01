@@ -76,6 +76,23 @@ export default function ImageDetail({ result, onBack }) {
               <DetailRow label="Sex" value={image.sex} />
               <DetailRow label="Dataset" value={image.dataset_source} />
               <DetailRow label="Image ID" value={image.id} />
+              {(image.anomaly_type || image.analyst || image.anomaly_status) && (
+                <>
+                  <tr>
+                    <td colSpan={2} className="detail-section-divider">
+                      Inspection Data
+                    </td>
+                  </tr>
+                  <DetailRow label="Anomaly" value={image.anomaly_description} />
+                  <DetailRow label="Status" value={image.anomaly_status} />
+                  <DetailRow label="Anomaly Type" value={image.anomaly_type} />
+                  <DetailRow label="Identification" value={image.identification} />
+                  <DetailRow label="Wall Location" value={image.wall_location} />
+                  <DetailRow label="Run Number" value={image.run_number} />
+                  <DetailRow label="Analyst" value={image.analyst} />
+                  <DetailRow label="Comment" value={image.analysis_comment} />
+                </>
+              )}
             </tbody>
           </table>
         </div>

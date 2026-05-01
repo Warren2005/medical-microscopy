@@ -110,3 +110,20 @@ export async function getExplainability(imageId) {
   const blob = await response.blob();
   return URL.createObjectURL(blob);
 }
+
+export async function uploadToLibrary(file, metadata) {
+  const form = new FormData();
+  form.append("file", file);
+  Object.entries(metadata).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") form.append(k, v);
+  });
+  const response = await fetch(`${BASE_URL}/library/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Upload failed: ${response.status}`);
+  }
+  return response.json();
+}

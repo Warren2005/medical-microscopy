@@ -5,6 +5,7 @@ import ResultsGrid from "./components/ResultsGrid";
 import ImageDetail from "./components/ImageDetail";
 import FilterBar from "./components/FilterBar";
 import StatusBar from "./components/StatusBar";
+import LibraryUpload from "./components/LibraryUpload";
 
 function SunIcon() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
   const [isDark, setIsDark] = useState(
     () => (localStorage.getItem("theme") ?? "dark") === "dark"
   );
+  const [mode, setMode] = useState("search"); // "search" | "library"
 
   // Apply theme to <html> and persist to localStorage
   useEffect(() => {
@@ -129,9 +131,22 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Medical Microscopy Similarity Engine</h1>
+        <nav className="header-nav">
+          <button
+            className={`nav-tab ${mode === "search" ? "nav-tab-active" : ""}`}
+            onClick={() => { setMode("search"); handleNewSearch(); }}
+          >
+            Search
+          </button>
+          <button
+            className={`nav-tab ${mode === "library" ? "nav-tab-active" : ""}`}
+            onClick={() => setMode("library")}
+          >
+            Add to Library
+          </button>
+        </nav>
         <div className="header-actions">
-          {state !== "idle" && (
+          {mode === "search" && state !== "idle" && (
             <button className="btn btn-secondary" onClick={handleNewSearch}>
               New Search
             </button>
@@ -154,7 +169,9 @@ export default function App() {
           </div>
         )}
 
-        {state === "idle" && (
+        {mode === "library" && <LibraryUpload />}
+
+        {mode === "search" && state === "idle" && (
           <>
             <DropZone onFileDrop={handleSearch} />
             <div className="text-search">
@@ -179,14 +196,14 @@ export default function App() {
           </>
         )}
 
-        {state === "searching" && (
+        {mode === "search" && state === "searching" && (
           <div className="loading">
             <div className="spinner" />
             <p>Analyzing image and searching for similar cases...</p>
           </div>
         )}
 
-        {(state === "results" || state === "detail") && results && (
+        {mode === "search" && (state === "results" || state === "detail") && results && (
           <>
             {filterOptions && (
               <FilterBar

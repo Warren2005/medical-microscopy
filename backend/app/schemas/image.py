@@ -15,6 +15,14 @@ class ImageBase(BaseModel):
     benign_malignant: Optional[str] = None
     age: Optional[int] = None
     sex: Optional[str] = None
+    anomaly_description: Optional[str] = None
+    anomaly_status: Optional[str] = None
+    anomaly_type: Optional[str] = None
+    identification: Optional[str] = None
+    wall_location: Optional[str] = None
+    run_number: Optional[str] = None
+    analysis_comment: Optional[str] = None
+    analyst: Optional[str] = None
 
 
 class ImageCreate(ImageBase):
@@ -27,3 +35,9 @@ class ImageResponse(ImageBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class LibraryUploadResponse(BaseModel):
+    image: ImageResponse
+    image_url: str
+    message: str

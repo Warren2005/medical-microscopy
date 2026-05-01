@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     ws_search,
     dicom_search,
     batch_search,
+    library,
 )
 
 api_router = APIRouter()
@@ -26,3 +27,4 @@ api_router.include_router(images.router, prefix="/images", tags=["Images"])
 api_router.include_router(feedback.router, prefix="/feedback", tags=["Feedback"])
 api_router.include_router(explain.router, prefix="/explain", tags=["Explainability"])
 api_router.include_router(ws_search.router, tags=["WebSocket"])
+api_router.include_router(library.router, prefix="/library", tags=["Library"])
