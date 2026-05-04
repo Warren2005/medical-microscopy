@@ -29,7 +29,7 @@ router = APIRouter()
 
 class TextSearchRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
-    top_k: int = Field(default=10, ge=1, le=50)
+    top_k: int = Field(default=30, ge=1, le=100)
     diagnosis: Optional[str] = None
     tissue_type: Optional[str] = None
     benign_malignant: Optional[str] = None

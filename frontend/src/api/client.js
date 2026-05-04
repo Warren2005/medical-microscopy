@@ -16,13 +16,13 @@ export async function searchSimilar(file, filters = {}) {
   formData.append("file", file);
 
   const params = new URLSearchParams();
+  params.set("limit", "50");
   if (filters.diagnosis) params.set("diagnosis", filters.diagnosis);
   if (filters.tissue_type) params.set("tissue_type", filters.tissue_type);
   if (filters.benign_malignant)
     params.set("benign_malignant", filters.benign_malignant);
 
-  const queryString = params.toString();
-  const url = `${BASE_URL}/search/similar${queryString ? `?${queryString}` : ""}`;
+  const url = `${BASE_URL}/search/similar?${params.toString()}`;
 
   const response = await fetch(url, { method: "POST", body: formData });
   if (!response.ok) {
@@ -47,7 +47,7 @@ export async function getFilters() {
 }
 
 export async function searchByText(query, filters = {}) {
-  const body = { query };
+  const body = { query, top_k: 50 };
   if (filters.diagnosis) body.diagnosis = filters.diagnosis;
   if (filters.tissue_type) body.tissue_type = filters.tissue_type;
   if (filters.benign_malignant) body.benign_malignant = filters.benign_malignant;

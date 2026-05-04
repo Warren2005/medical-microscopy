@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { searchSimilar, searchByText, getFilters, checkHealth } from "./api/client";
+import { searchSimilar, searchByText, checkHealth } from "./api/client";
 import DropZone from "./components/DropZone";
 import ResultsGrid from "./components/ResultsGrid";
 import ImageDetail from "./components/ImageDetail";
-import FilterBar from "./components/FilterBar";
 import StatusBar from "./components/StatusBar";
 import LibraryUpload from "./components/LibraryUpload";
 
@@ -52,8 +51,7 @@ export default function App() {
   const [state, setState] = useState("idle"); // idle | searching | results | detail
   const [results, setResults] = useState(null);
   const [selectedResult, setSelectedResult] = useState(null);
-  const [filters, setFilters] = useState({});
-  const [filterOptions, setFilterOptions] = useState(null);
+  const [filters] = useState({});
   const [health, setHealth] = useState(null);
   const [error, setError] = useState(null);
   const [queryFile, setQueryFile] = useState(null);
@@ -75,13 +73,6 @@ export default function App() {
     checkHealth()
       .then(setHealth)
       .catch(() => setHealth({ status: "unreachable" }));
-  }, []);
-
-  // Load filter options on mount
-  useEffect(() => {
-    getFilters()
-      .then(setFilterOptions)
-      .catch(() => {});
   }, []);
 
   const handleSearch = useCallback(
@@ -141,16 +132,6 @@ export default function App() {
     setQueryFile(null);
     setTextQuery("");
   }, []);
-
-  const handleFilterChange = useCallback(
-    (newFilters) => {
-      setFilters(newFilters);
-      if (queryFile) {
-        handleSearch(queryFile);
-      }
-    },
-    [queryFile, handleSearch]
-  );
 
   return (
     <div className="app">
@@ -236,14 +217,6 @@ export default function App() {
 
         {mode === "search" && (state === "results" || state === "detail") && results && (
           <>
-            {filterOptions && (
-              <FilterBar
-                options={filterOptions}
-                filters={filters}
-                onChange={handleFilterChange}
-              />
-            )}
-
             {state === "results" && (
               <ResultsGrid
                 results={results.results}

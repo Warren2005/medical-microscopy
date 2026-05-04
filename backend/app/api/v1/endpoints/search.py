@@ -39,7 +39,7 @@ MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 async def search_similar(
     request: Request,
     file: UploadFile = File(...),
-    limit: int = Query(default=10, ge=1, le=50),
+    limit: int = Query(default=30, ge=1, le=100),
     diagnosis: Optional[str] = Query(default=None),
     tissue_type: Optional[str] = Query(default=None),
     benign_malignant: Optional[str] = Query(default=None),
