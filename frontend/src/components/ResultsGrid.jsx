@@ -30,6 +30,7 @@ export default function ResultsGrid({ results, onResultClick, queryImageId }) {
         <div
           key={result.image.id}
           className="result-card"
+          style={{ animationDelay: `${Math.min(index, 7) * 55}ms` }}
           onClick={() => onResultClick(result)}
         >
           <div className="result-rank">#{index + 1}</div>
@@ -39,6 +40,9 @@ export default function ResultsGrid({ results, onResultClick, queryImageId }) {
             className="result-image"
             loading="lazy"
           />
+          <div className="score-bar-track">
+            <div className="score-bar-fill" style={{ width: `${(result.similarity_score * 100).toFixed(1)}%` }} />
+          </div>
           <div className="result-info">
             <div className="result-score">
               {(result.similarity_score * 100).toFixed(1)}% match

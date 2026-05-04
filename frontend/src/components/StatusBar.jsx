@@ -16,7 +16,10 @@ export default function StatusBar({ health, results }) {
   return (
     <footer className="status-bar">
       <div className="status-item">
-        <span className="status-dot" style={{ backgroundColor: statusColor }} />
+        <span
+          className={`status-dot${statusColor === "green" ? " status-dot-online" : ""}`}
+          style={{ backgroundColor: statusColor }}
+        />
         <span>{statusText}</span>
       </div>
 

@@ -7,6 +7,30 @@ import FilterBar from "./components/FilterBar";
 import StatusBar from "./components/StatusBar";
 import LibraryUpload from "./components/LibraryUpload";
 
+function SkeletonCard({ delay }) {
+  return (
+    <div className="skeleton-card" style={{ animationDelay: `${delay}ms` }}>
+      <div className="skeleton-image skeleton-pulse" />
+      <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "60%" }} /></div>
+      <div className="skeleton-info">
+        <div className="skeleton-line skeleton-line-short skeleton-pulse" />
+        <div className="skeleton-line skeleton-line-medium skeleton-pulse" />
+        <div className="skeleton-line skeleton-line-long skeleton-pulse" />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonGrid() {
+  return (
+    <div className="results-grid" style={{ width: "100%", maxWidth: 920 }}>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <SkeletonCard key={i} delay={i * 60} />
+      ))}
+    </div>
+  );
+}
+
 function SunIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -198,8 +222,15 @@ export default function App() {
 
         {mode === "search" && state === "searching" && (
           <div className="loading">
-            <div className="spinner" />
-            <p>Analyzing image and searching for similar cases...</p>
+            <div className="loading-header">
+              <div className="spinner" />
+              <div className="loading-steps">
+                <p className="loading-step">Extracting visual features...</p>
+                <p className="loading-step">Searching vector index...</p>
+                <p className="loading-step">Ranking by similarity</p>
+              </div>
+            </div>
+            <SkeletonGrid />
           </div>
         )}
 

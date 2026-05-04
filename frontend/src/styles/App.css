@@ -10,6 +10,7 @@
   --accent:         #22d3ee;
   --accent-hover:   #06b6d4;
   --accent-dim:     rgba(34, 211, 238, 0.12);
+  --accent-glow:    rgba(34, 211, 238, 0.18);
   --text-primary:   #e8edf5;
   --text-secondary: #8b949e;
   --text-muted:     #4d5b6e;
@@ -18,7 +19,10 @@
   --success-dim:    rgba(52, 211, 153, 0.12);
   --danger-dim:     rgba(248, 113, 113, 0.12);
   --shadow-card:    0 1px 3px rgba(0, 0, 0, 0.45);
-  --shadow-hover:   0 4px 20px rgba(0, 0, 0, 0.55);
+  --shadow-hover:   0 8px 28px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--accent), 0 0 24px var(--accent-glow);
+  --header-bg:      rgba(17, 24, 39, 0.82);
+  --skeleton-base:  #1a2234;
+  --skeleton-shine: #232d44;
 }
 
 /* ============================================================
@@ -33,6 +37,7 @@
   --accent:         #0369a1;
   --accent-hover:   #0284c7;
   --accent-dim:     rgba(3, 105, 161, 0.08);
+  --accent-glow:    rgba(3, 105, 161, 0.12);
   --text-primary:   #0a1929;
   --text-secondary: #4a6070;
   --text-muted:     #8aa4bc;
@@ -41,7 +46,10 @@
   --success-dim:    rgba(5, 150, 105, 0.08);
   --danger-dim:     rgba(220, 38, 38, 0.08);
   --shadow-card:    0 1px 3px rgba(10, 25, 41, 0.08);
-  --shadow-hover:   0 4px 20px rgba(10, 25, 41, 0.14);
+  --shadow-hover:   0 8px 28px rgba(10, 25, 41, 0.18), 0 0 0 1px var(--accent);
+  --header-bg:      rgba(255, 255, 255, 0.82);
+  --skeleton-base:  #e8f0f8;
+  --skeleton-shine: #f0f6ff;
 }
 
 /* ============================================================
@@ -77,7 +85,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  background: var(--bg-surface);
+  background: var(--header-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
@@ -200,6 +210,8 @@ body {
 .dropzone-active {
   border-color: var(--accent);
   background: var(--accent-dim);
+  box-shadow: 0 0 0 4px var(--accent-glow), inset 0 0 32px var(--accent-dim);
+  animation: dropzonePulse 1.4s ease-in-out infinite;
 }
 
 .dropzone-icon {
@@ -284,10 +296,37 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  margin-top: 120px;
+  margin-top: 80px;
   color: var(--text-secondary);
   font-size: 13px;
+  width: 100%;
+  max-width: 920px;
 }
+
+.loading-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.loading-step {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: fadeInStep 0.4s ease forwards;
+}
+.loading-step:nth-child(1) { animation-delay: 0.1s; }
+.loading-step:nth-child(2) { animation-delay: 0.9s; color: var(--text-secondary); }
+.loading-step:nth-child(3) { animation-delay: 1.7s; color: var(--accent); }
 
 .spinner {
   width: 34px;
@@ -300,6 +339,11 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
@@ -399,13 +443,16 @@ body {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-card);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.22s ease;
+  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .result-card:hover {
   border-color: var(--accent);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .result-rank {
@@ -801,4 +848,122 @@ body {
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.07em;
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+@keyframes dropzonePulse {
+  0%, 100% { box-shadow: 0 0 0 4px var(--accent-glow), inset 0 0 32px var(--accent-dim); }
+  50%       { box-shadow: 0 0 0 8px var(--accent-dim), inset 0 0 48px var(--accent-glow); }
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  60%      { box-shadow: 0 0 0 5px rgba(52, 211, 153, 0); }
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   SCORE BAR — thin similarity indicator under card image
+   ============================================================ */
+.score-bar-track {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-hover), var(--accent));
+  opacity: 0.85;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ============================================================
+   SKELETON LOADING GRID
+   ============================================================ */
+.skeleton-card {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-base) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 175px;
+}
+
+.skeleton-info {
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-line {
+  height: 10px;
+  border-radius: 5px;
+}
+.skeleton-line-short  { width: 55%; }
+.skeleton-line-medium { width: 75%; }
+.skeleton-line-long   { width: 90%; }
+
+/* ============================================================
+   PAGE FADE — detail view entrance
+   ============================================================ */
+.image-detail {
+  width: 100%;
+  max-width: 920px;
+  animation: pageFadeIn 0.28s ease both;
+}
+
+/* ============================================================
+   STATUS DOT — pulsing online indicator
+   ============================================================ */
+.status-dot-online {
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+/* ============================================================
+   REDUCED MOTION — respect OS preference
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .result-card,
+  .skeleton-card,
+  .skeleton-pulse,
+  .image-detail,
+  .loading-step,
+  .dropzone-active,
+  .status-dot-online {
+    animation: none !important;
+  }
 }
